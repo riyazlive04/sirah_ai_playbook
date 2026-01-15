@@ -5,10 +5,10 @@ import sirahLogo from "@/assets/sirah-digital-logo.jpg";
 
 export const Hero = () => {
   return (
-    <section className="hero-gradient min-h-screen relative overflow-hidden">
+    <section className="hero-gradient min-h-screen relative overflow-hidden pt-16 sm:pt-20">
       {/* Logo in top left */}
-      <div className="absolute top-2 left-4 z-20">
-        <img src={sirahLogo} alt="Sirah Digital" className="h-10 sm:h-12 w-auto" />
+      <div className="absolute top-3 left-4 z-20">
+        <img src={sirahLogo} alt="Sirah Digital" className="h-10 sm:h-14 w-auto" />
       </div>
 
       {/* Background pattern */}

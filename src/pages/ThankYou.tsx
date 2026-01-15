@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle, Download } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
+import sirahLogo from "@/assets/sirah-digital-logo.jpg";
 
 // Extend window type for dataLayer
 declare global {
@@ -33,7 +34,11 @@ export default function ThankYou() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      {/* Logo in top left */}
+      <Link to="/" className="absolute top-3 left-4 z-20">
+        <img src={sirahLogo} alt="Sirah Digital" className="h-10 sm:h-14 w-auto" />
+      </Link>
       {/* Hero Section */}
       <div className="bg-gradient-to-b from-primary to-primary/90 py-16 px-4 text-center">
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-primary-foreground leading-tight mb-4 max-w-3xl mx-auto">
