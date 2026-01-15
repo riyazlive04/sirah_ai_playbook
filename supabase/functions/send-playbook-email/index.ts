@@ -30,16 +30,10 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Get the playbook file URL (assumes file is named "playbook.pdf" in the playbooks bucket)
-    const { data: files } = await supabase.storage.from("playbooks").list();
+    // Get the playbook file URL - the playbook is hosted publicly
+    const playbookUrl = `${supabaseUrl}/storage/v1/object/public/playbooks/Sirah_Digital_AI_Playbook_2026.html`;
     
-    let playbookUrl = "";
-    if (files && files.length > 0) {
-      const { data: urlData } = supabase.storage
-        .from("playbooks")
-        .getPublicUrl(files[0].name);
-      playbookUrl = urlData.publicUrl;
-    }
+    console.log("Playbook URL:", playbookUrl);
 
     const emailResponse = await resend.emails.send({
       from: "Sirah Digital <onboarding@resend.dev>",
@@ -50,40 +44,45 @@ const handler = async (req: Request): Promise<Response> => {
         <html>
         <head>
           <style>
-            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1a2744; }
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1a2744; margin: 0; padding: 0; }
             .container { max-width: 600px; margin: 0 auto; padding: 40px 20px; }
             .header { text-align: center; margin-bottom: 30px; }
-            .header h1 { color: #1a2744; margin-bottom: 10px; }
+            .header h1 { color: #1a2744; margin-bottom: 10px; font-size: 28px; }
             .content { background: #f8f9fa; border-radius: 12px; padding: 30px; margin-bottom: 30px; }
             .cta-button { display: inline-block; background: #daa520; color: #1a2744; padding: 16px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; margin: 20px 0; }
             .footer { text-align: center; color: #666; font-size: 14px; }
+            .checklist { text-align: left; margin: 20px 0; }
+            .checklist-item { display: flex; align-items: center; margin-bottom: 10px; }
+            .check { color: #daa520; margin-right: 10px; font-size: 18px; }
           </style>
         </head>
         <body>
           <div class="container">
             <div class="header">
-              <h1>🎉 Welcome, ${name}!</h1>
+              <h1>🎉 Your AI Playbook Is Ready, ${name}!</h1>
             </div>
             <div class="content">
-              <p>Thank you for downloading the <strong>Practical AI Playbook for Business Owners Scaling in 2026</strong>.</p>
-              <p>This 60-page guide will help you:</p>
-              <ul>
-                <li>Implement AI systems without hiring more staff</li>
-                <li>Scale from ₹5-15 Lakhs to ₹50+ Lakhs per month</li>
-                <li>Build sustainable, stress-free growth</li>
-              </ul>
-              ${playbookUrl ? `
-              <p style="text-align: center;">
+              <p>Thank you for downloading the <strong>Practical AI Playbook for Entrepreneurs (2026)</strong>.</p>
+              <p>This 60-page comprehensive guide will help you:</p>
+              <div class="checklist">
+                <div class="checklist-item"><span class="check">✓</span> Implement AI systems without hiring more staff</div>
+                <div class="checklist-item"><span class="check">✓</span> Scale from ₹5-15 Lakhs to ₹50+ Lakhs per month</div>
+                <div class="checklist-item"><span class="check">✓</span> Build sustainable, stress-free growth</div>
+                <div class="checklist-item"><span class="check">✓</span> Get copy-paste prompt libraries for sales & marketing</div>
+              </div>
+              <p style="text-align: center; margin-top: 30px;">
                 <a href="${playbookUrl}" class="cta-button">📥 Download Your Playbook</a>
               </p>
-              ` : `
-              <p><em>Your playbook will be available soon. We'll send you another email when it's ready!</em></p>
-              `}
+              <p style="font-size: 13px; color: #666; text-align: center; margin-top: 15px;">This guide is designed to be read slowly, implemented step by step, and used as a reference while building systems.</p>
             </div>
             <div class="footer">
               <p>Questions? Reply to this email - we're here to help!</p>
-              <p>Best regards,<br>The Sirah Digital Team</p>
-              <p><a href="https://sirahdigital.in/">sirahdigital.in</a></p>
+              <p>Best regards,<br><strong>The Sirah Digital Team</strong></p>
+              <p style="margin-top: 20px;">
+                <a href="https://www.linkedin.com/in/iammohamedriyaz/" style="color: #666; margin-right: 15px;">LinkedIn</a>
+                <a href="https://www.youtube.com/@riyazlive" style="color: #666;">YouTube</a>
+              </p>
+              <p><a href="https://sirahdigital.in/" style="color: #0056b3;">sirahdigital.in</a></p>
             </div>
           </div>
         </body>

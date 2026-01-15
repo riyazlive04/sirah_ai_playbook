@@ -1,11 +1,22 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, RefreshCw, Users, Mail, Phone, Globe, Calendar, Download } from "lucide-react";
+import { LogOut, RefreshCw, Users, Mail, Phone, Globe, Calendar, Download, Search, Trash2, X } from "lucide-react";
 import sirahLogo from "@/assets/sirah-digital-logo.jpg";
 import { Session } from "@supabase/supabase-js";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Lead {
   id: string;
@@ -21,6 +32,10 @@ export default function Admin() {
   const [session, setSession] = useState<Session | null>(null);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [leadToDelete, setLeadToDelete] = useState<Lead | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -71,6 +86,44 @@ export default function Admin() {
     }
   };
 
+  const handleDeleteClick = (lead: Lead) => {
+    setLeadToDelete(lead);
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!leadToDelete || !session) return;
+
+    setIsDeleting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("delete-lead", {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: { leadId: leadToDelete.id },
+      });
+
+      if (error) throw error;
+
+      setLeads(leads.filter(l => l.id !== leadToDelete.id));
+      toast({
+        title: "Lead deleted",
+        description: `${leadToDelete.name} has been removed.`,
+      });
+    } catch (error: any) {
+      console.error("Error deleting lead:", error);
+      toast({
+        title: "Error deleting lead",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+      setDeleteConfirmOpen(false);
+      setLeadToDelete(null);
+    }
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate("/admin/login");
@@ -78,7 +131,7 @@ export default function Admin() {
 
   const exportToCSV = () => {
     const headers = ["Name", "Email", "Phone", "Website", "Playbook Sent", "Date"];
-    const csvData = leads.map((lead) => [
+    const csvData = filteredLeads.map((lead) => [
       lead.name,
       lead.email,
       lead.phone || "",
@@ -99,6 +152,17 @@ export default function Admin() {
     a.click();
     URL.revokeObjectURL(url);
   };
+
+  // Filter leads based on search query (email or name)
+  const filteredLeads = useMemo(() => {
+    if (!searchQuery.trim()) return leads;
+    const query = searchQuery.toLowerCase();
+    return leads.filter(
+      lead =>
+        lead.email.toLowerCase().includes(query) ||
+        lead.name.toLowerCase().includes(query)
+    );
+  }, [leads, searchQuery]);
 
   if (!session) {
     return null;
@@ -162,17 +226,44 @@ export default function Admin() {
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="flex flex-wrap gap-3 mb-6">
-          <Button onClick={() => fetchLeads()} disabled={isLoading} variant="outline">
-            <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
-            Refresh
-          </Button>
-          <Button onClick={exportToCSV} disabled={leads.length === 0} variant="outline">
-            <Download className="w-4 h-4 mr-2" />
-            Export CSV
-          </Button>
+        {/* Search and Actions */}
+        <div className="flex flex-col sm:flex-row gap-3 mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search by name or email..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-10"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+          <div className="flex gap-3">
+            <Button onClick={() => fetchLeads()} disabled={isLoading} variant="outline">
+              <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
+              Refresh
+            </Button>
+            <Button onClick={exportToCSV} disabled={filteredLeads.length === 0} variant="outline">
+              <Download className="w-4 h-4 mr-2" />
+              Export CSV
+            </Button>
+          </div>
         </div>
+
+        {/* Results count */}
+        {searchQuery && (
+          <p className="text-sm text-muted-foreground mb-4">
+            Showing {filteredLeads.length} of {leads.length} leads
+          </p>
+        )}
 
         {/* Leads Table */}
         <div className="bg-card rounded-xl border border-border overflow-hidden">
@@ -186,23 +277,24 @@ export default function Admin() {
                   <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground hidden lg:table-cell">Website</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Status</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground hidden sm:table-cell">Date</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
+                    <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
                       Loading leads...
                     </td>
                   </tr>
-                ) : leads.length === 0 ? (
+                ) : filteredLeads.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
-                      No leads yet. Share your landing page to start collecting leads!
+                    <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
+                      {searchQuery ? "No leads match your search." : "No leads yet. Share your landing page to start collecting leads!"}
                     </td>
                   </tr>
                 ) : (
-                  leads.map((lead) => (
+                  filteredLeads.map((lead) => (
                     <tr key={lead.id} className="hover:bg-muted/30">
                       <td className="px-4 py-3 text-foreground font-medium">{lead.name}</td>
                       <td className="px-4 py-3">
@@ -243,6 +335,16 @@ export default function Admin() {
                       <td className="px-4 py-3 text-muted-foreground text-sm hidden sm:table-cell">
                         {new Date(lead.created_at).toLocaleDateString()}
                       </td>
+                      <td className="px-4 py-3">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteClick(lead)}
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </td>
                     </tr>
                   ))
                 )}
@@ -251,6 +353,28 @@ export default function Admin() {
           </div>
         </div>
       </main>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Lead</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete <strong>{leadToDelete?.name}</strong> ({leadToDelete?.email})? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -1,1 +1,10 @@
 project_id = "chaycubqtxtadkxslimf"
+
+[functions.get-leads]
+verify_jwt = false
+
+[functions.send-playbook-email]
+verify_jwt = false
+
+[functions.delete-lead]
+verify_jwt = false
