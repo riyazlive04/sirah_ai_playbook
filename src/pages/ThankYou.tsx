@@ -12,14 +12,24 @@ declare global {
 
 export default function ThankYou() {
   useEffect(() => {
-    // Push virtual_event to dataLayer for Facebook conversion tracking
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({
+    const eventData = {
       event: 'virtual_event',
       eventCategory: 'Lead',
       eventAction: 'PlaybookDownload',
       eventLabel: 'ThankYouPageView'
-    });
+    };
+
+    // Push to local dataLayer (for direct access scenarios)
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push(eventData);
+
+    // Also send to parent window for iframe embedding scenarios
+    if (window.parent !== window) {
+      window.parent.postMessage({
+        type: 'dataLayer',
+        ...eventData
+      }, '*');
+    }
   }, []);
 
   return (
