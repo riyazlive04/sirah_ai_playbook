@@ -31,7 +31,7 @@ const handler = async (req: Request): Promise<Response> => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Use configured app URL for email links
-    const appUrl = "https://sirahdigital.in";
+    const appUrl = "https://aiautomationplaybook.sirahagents.com";
     const pdfUrl = `${appUrl}/Sirah_Digital_AI_Playbook_2026.pdf`;
     const playbookViewerUrl = `${appUrl}/playbook`;
     

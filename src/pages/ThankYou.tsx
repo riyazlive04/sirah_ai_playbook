@@ -1,8 +1,27 @@
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Download } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useEffect } from "react";
+
+// Extend window type for dataLayer
+declare global {
+  interface Window {
+    dataLayer: Record<string, unknown>[];
+  }
+}
 
 export default function ThankYou() {
+  useEffect(() => {
+    // Push virtual_event to dataLayer for Facebook conversion tracking
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: 'virtual_event',
+      eventCategory: 'Lead',
+      eventAction: 'PlaybookDownload',
+      eventLabel: 'ThankYouPageView'
+    });
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
