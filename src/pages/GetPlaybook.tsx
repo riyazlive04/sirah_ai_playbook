@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import sirahLogo from "@/assets/sirah-digital-logo.jpg";
 import { useToast } from "@/hooks/use-toast";
 
 export default function GetPlaybook() {
@@ -70,7 +71,11 @@ export default function GetPlaybook() {
   };
 
   return (
-    <div className="min-h-screen hero-gradient flex flex-col items-center justify-center px-4 py-16">
+    <div className="min-h-screen hero-gradient flex flex-col items-center justify-center px-4 pt-16 pb-8 relative">
+      {/* Logo in top left */}
+      <Link to="/" className="absolute top-3 left-4 z-20">
+        <img src={sirahLogo} alt="Sirah Digital" className="h-10 sm:h-14 w-auto" />
+      </Link>
       <div className="w-full max-w-md">
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-primary-foreground text-center leading-tight mb-4">
           Build a Smarter Business for 2026
