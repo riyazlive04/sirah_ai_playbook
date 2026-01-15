@@ -30,12 +30,12 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Get the playbook viewer URL - links to the app's playbook page with PDF download
-    // Note: We'll use the app URL which should be configured based on environment
-    const appUrl = "https://sirahdigital.in"; // Update this to your production URL
-    const playbookUrl = `${appUrl}/playbook`;
+    // Direct PDF download URL
+    const appUrl = "https://sirahdigital.in";
+    const pdfUrl = `${appUrl}/Sirah_Digital_AI_Playbook_2026.pdf`;
+    const playbookViewerUrl = `${appUrl}/playbook`;
     
-    console.log("Playbook URL:", playbookUrl);
+    console.log("PDF URL:", pdfUrl);
 
     const emailResponse = await resend.emails.send({
       from: "Sirah Digital <support@sirahdigital.in>",
@@ -73,7 +73,10 @@ const handler = async (req: Request): Promise<Response> => {
                 <div class="checklist-item"><span class="check">✓</span> Get copy-paste prompt libraries for sales & marketing</div>
               </div>
               <p style="text-align: center; margin-top: 30px;">
-                <a href="${playbookUrl}" class="cta-button">📥 View & Download Your Playbook (PDF)</a>
+                <a href="${pdfUrl}" class="cta-button">📥 Download Your Playbook (PDF)</a>
+              </p>
+              <p style="text-align: center; margin-top: 10px;">
+                <a href="${playbookViewerUrl}" style="color: #0056b3; font-size: 14px;">Or view it online here</a>
               </p>
               <p style="font-size: 13px; color: #666; text-align: center; margin-top: 15px;">This guide is designed to be read slowly, implemented step by step, and used as a reference while building systems.</p>
             </div>

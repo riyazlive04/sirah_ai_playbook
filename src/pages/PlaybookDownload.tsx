@@ -1,18 +1,18 @@
-import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Download, FileText, ArrowLeft, Loader2 } from "lucide-react";
+import { Download, FileText, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 
-export default function PlaybookDownload() {
-  const [isLoading, setIsLoading] = useState(true);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
+const PDF_URL = "/Sirah_Digital_AI_Playbook_2026.pdf";
 
+export default function PlaybookDownload() {
   const handleDownloadPDF = () => {
-    // Use browser's native print-to-PDF functionality
-    // This is secure and doesn't require vulnerable dependencies
-    if (iframeRef.current?.contentWindow) {
-      iframeRef.current.contentWindow.print();
-    }
+    // Create a link element and trigger download
+    const link = document.createElement("a");
+    link.href = PDF_URL;
+    link.download = "Sirah_Digital_AI_Playbook_2026.pdf";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -31,7 +31,6 @@ export default function PlaybookDownload() {
           </div>
           <Button 
             onClick={handleDownloadPDF} 
-            disabled={isLoading}
             className="bg-accent hover:bg-accent/90 text-accent-foreground"
           >
             <Download className="w-4 h-4 mr-2" />
@@ -40,24 +39,12 @@ export default function PlaybookDownload() {
         </div>
       </header>
 
-      {/* Loading State */}
-      {isLoading && (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <Loader2 className="w-12 h-12 animate-spin text-accent mx-auto mb-4" />
-            <p className="text-muted-foreground">Loading playbook...</p>
-          </div>
-        </div>
-      )}
-
-      {/* Playbook Viewer */}
-      <div className={`flex-1 ${isLoading ? "hidden" : "block"}`}>
+      {/* PDF Viewer */}
+      <div className="flex-1">
         <iframe
-          ref={iframeRef}
-          src="/Sirah_Digital_AI_Playbook_2026.html"
+          src={PDF_URL}
           className="w-full h-full min-h-screen border-0"
           title="AI Playbook 2026"
-          onLoad={() => setIsLoading(false)}
         />
       </div>
     </div>
