@@ -1,10 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { Download, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import sirahLogo from "@/assets/sirah-digital-logo.jpg";
 
 export const Hero = () => {
   return (
     <section className="hero-gradient min-h-screen relative overflow-hidden">
+      {/* Logo in top left */}
+      <div className="absolute top-6 left-6 z-20">
+        <img src={sirahLogo} alt="Sirah Digital" className="h-12 sm:h-16 w-auto" />
+      </div>
+
       {/* Background pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-20 right-20 w-72 h-72 bg-accent rounded-full blur-3xl animate-float" />
