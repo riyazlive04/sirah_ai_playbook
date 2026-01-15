@@ -1,61 +1,17 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Download, FileText, ArrowLeft, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function PlaybookDownload() {
-  const [isGenerating, setIsGenerating] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  useEffect(() => {
-    // Wait for iframe to load
-    const timer = setTimeout(() => setIsLoading(false), 1500);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const handleDownloadPDF = async () => {
-    setIsGenerating(true);
-    
-    try {
-      // Dynamically import html2pdf
-      const html2pdf = (await import("html2pdf.js")).default;
-      
-      // Get the iframe content
-      const iframe = iframeRef.current;
-      if (!iframe || !iframe.contentDocument) {
-        throw new Error("Could not access playbook content");
-      }
-
-      const content = iframe.contentDocument.body;
-      
-      // Configure pdf options for A4 pages
-      const opt = {
-        margin: 0,
-        filename: "Sirah_Digital_AI_Playbook_2026.pdf",
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { 
-          scale: 2,
-          useCORS: true,
-          letterRendering: true,
-        },
-        jsPDF: { 
-          unit: "mm", 
-          format: "a4", 
-          orientation: "portrait" 
-        },
-        pagebreak: { mode: ["css", "legacy"] }
-      };
-
-      await html2pdf().set(opt).from(content).save();
-    } catch (error) {
-      console.error("Error generating PDF:", error);
-      // Fallback: open print dialog
-      if (iframeRef.current?.contentWindow) {
-        iframeRef.current.contentWindow.print();
-      }
-    } finally {
-      setIsGenerating(false);
+  const handleDownloadPDF = () => {
+    // Use browser's native print-to-PDF functionality
+    // This is secure and doesn't require vulnerable dependencies
+    if (iframeRef.current?.contentWindow) {
+      iframeRef.current.contentWindow.print();
     }
   };
 
@@ -75,20 +31,11 @@ export default function PlaybookDownload() {
           </div>
           <Button 
             onClick={handleDownloadPDF} 
-            disabled={isGenerating || isLoading}
+            disabled={isLoading}
             className="bg-accent hover:bg-accent/90 text-accent-foreground"
           >
-            {isGenerating ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Generating PDF...
-              </>
-            ) : (
-              <>
-                <Download className="w-4 h-4 mr-2" />
-                Download PDF
-              </>
-            )}
+            <Download className="w-4 h-4 mr-2" />
+            Download PDF
           </Button>
         </div>
       </header>
