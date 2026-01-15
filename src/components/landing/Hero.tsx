@@ -17,7 +17,7 @@ export const Hero = () => {
         <div className="absolute bottom-20 left-20 w-96 h-96 bg-accent/50 rounded-full blur-3xl animate-float" style={{ animationDelay: '3s' }} />
       </div>
 
-      <div className="section-container relative z-10 flex flex-col items-center justify-center min-h-screen text-center">
+      <div className="section-container relative z-10 flex flex-col items-center justify-center min-h-screen text-center pt-12 pb-16">
         <span className="animate-fade-up inline-block mb-6 px-4 py-2 bg-accent/20 text-accent-foreground rounded-full text-sm font-medium backdrop-blur-sm border border-accent/30">
           Free 60-Page AI Playbook
         </span>
