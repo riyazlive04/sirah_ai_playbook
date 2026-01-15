@@ -38,7 +38,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Playbook URL:", playbookUrl);
 
     const emailResponse = await resend.emails.send({
-      from: "Sirah Digital <onboarding@resend.dev>",
+      from: "Sirah Digital <support@sirahdigital.in>",
       to: [email],
       subject: "Your AI Playbook for 2026 is Ready!",
       html: `
