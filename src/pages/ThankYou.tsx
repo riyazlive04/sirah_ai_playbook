@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Download } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function ThankYou() {
@@ -30,9 +30,17 @@ export default function ThankYou() {
           <p className="text-muted-foreground mb-2">
             Thank you for downloading the Practical AI Playbook for Entrepreneurs (2026).
           </p>
-          <p className="text-muted-foreground mb-8">
+          <p className="text-muted-foreground mb-6">
             You'll receive the playbook in your inbox shortly.
           </p>
+
+          {/* Direct Download Button */}
+          <Button asChild className="mb-6 bg-accent hover:bg-accent/90 text-accent-foreground">
+            <Link to="/playbook">
+              <Download className="w-4 h-4 mr-2" />
+              View & Download PDF Now
+            </Link>
+          </Button>
 
           {/* Guide Info */}
           <div className="text-left mb-8">
