@@ -32,10 +32,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Use configured app URL for email links
     const appUrl = "https://aiautomationplaybook.sirahagents.com";
-    const pdfUrl = `${appUrl}/Sirah_Digital_AI_Playbook_2026.pdf`;
-    const playbookViewerUrl = `${appUrl}/playbook`;
+    const playbookUrl = `${appUrl}/sirah_digital_ai_playbook_2026`;
     
-    console.log("Playbook URLs - PDF:", pdfUrl, "Viewer:", playbookViewerUrl);
+    console.log("Playbook URL:", playbookUrl);
 
     const emailResponse = await resend.emails.send({
       from: "Sirah Digital <support@sirahdigital.in>",
@@ -73,10 +72,7 @@ const handler = async (req: Request): Promise<Response> => {
                 <div class="checklist-item"><span class="check">✓</span> Get copy-paste prompt libraries for sales & marketing</div>
               </div>
               <p style="text-align: center; margin-top: 30px;">
-                <a href="${pdfUrl}" class="cta-button">📥 Download Your Playbook (PDF)</a>
-              </p>
-              <p style="text-align: center; margin-top: 10px;">
-                <a href="${playbookViewerUrl}" style="color: #0056b3; font-size: 14px;">Or view it online here</a>
+                <a href="${playbookUrl}" class="cta-button">📥 Download Your Playbook (PDF)</a>
               </p>
               <p style="font-size: 13px; color: #666; text-align: center; margin-top: 15px;">This guide is designed to be read slowly, implemented step by step, and used as a reference while building systems.</p>
             </div>
