@@ -18,15 +18,27 @@ export default function GetPlaybook() {
 
   // Validation helpers
   const isValidEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+    // RFC 5322 compliant email regex - checks proper format with valid TLD
+    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+    return email.length <= 254 && emailRegex.test(email.trim().toLowerCase());
   };
 
   const isValidPhone = (phone: string) => {
-    // Allow 10-15 digits, optional + prefix, spaces, dashes, parentheses
-    const phoneRegex = /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,4}[-\s\.]?[0-9]{1,9}$/;
-    const digitsOnly = phone.replace(/\D/g, '');
-    return digitsOnly.length >= 10 && digitsOnly.length <= 15 && phoneRegex.test(phone.replace(/\s/g, ''));
+    // Remove all non-digit characters except +
+    const cleaned = phone.replace(/[^\d+]/g, '');
+    
+    // Indian mobile: 10 digits starting with 6-9
+    const indianMobile = /^[6-9]\d{9}$/;
+    
+    // Indian with country code: +91 followed by 10 digits starting with 6-9
+    const indianWithCode = /^\+91[6-9]\d{9}$/;
+    
+    // International: + followed by 10-15 digits
+    const international = /^\+\d{10,15}$/;
+    
+    return indianMobile.test(cleaned) || 
+           indianWithCode.test(cleaned) || 
+           international.test(cleaned);
   };
 
   const isValidUrl = (url: string) => {
@@ -65,7 +77,7 @@ export default function GetPlaybook() {
     if (phone.trim() && !isValidPhone(phone)) {
       toast({
         title: "Invalid phone number",
-        description: "Please enter a valid phone number (10-15 digits).",
+        description: "Enter a 10-digit mobile number (starting with 6-9) or include country code (e.g., +91).",
         variant: "destructive",
       });
       return;
