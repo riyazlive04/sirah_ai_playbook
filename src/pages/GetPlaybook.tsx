@@ -16,13 +16,66 @@ export default function GetPlaybook() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // Validation helpers
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const isValidPhone = (phone: string) => {
+    // Allow 10-15 digits, optional + prefix, spaces, dashes, parentheses
+    const phoneRegex = /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,4}[-\s\.]?[0-9]{1,9}$/;
+    const digitsOnly = phone.replace(/\D/g, '');
+    return digitsOnly.length >= 10 && digitsOnly.length <= 15 && phoneRegex.test(phone.replace(/\s/g, ''));
+  };
+
+  const isValidUrl = (url: string) => {
+    try {
+      new URL(url.startsWith('http') ? url : `https://${url}`);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!name || !email) {
+    // Required fields validation
+    if (!name.trim() || !email.trim() || !websiteUrl.trim()) {
       toast({
         title: "Please fill in required fields",
-        description: "Name and email are required.",
+        description: "Name, email, and website URL are required.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Email validation
+    if (!isValidEmail(email)) {
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Phone validation (if provided)
+    if (phone.trim() && !isValidPhone(phone)) {
+      toast({
+        title: "Invalid phone number",
+        description: "Please enter a valid phone number (10-15 digits).",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Website URL validation
+    if (!isValidUrl(websiteUrl)) {
+      toast({
+        title: "Invalid website URL",
+        description: "Please enter a valid website URL.",
         variant: "destructive",
       });
       return;
@@ -110,10 +163,11 @@ export default function GetPlaybook() {
           />
           <Input
             type="url"
-            placeholder="Website URL (optional)"
+            placeholder="Website URL"
             value={websiteUrl}
             onChange={(e) => setWebsiteUrl(e.target.value)}
             className="bg-muted/50 border-border/30 text-foreground placeholder:text-muted-foreground h-14 rounded-xl"
+            required
           />
 
           <Button
