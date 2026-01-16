@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, RefreshCw, Users, Mail, Phone, Globe, Calendar, Download, Search, Trash2, X } from "lucide-react";
+import { LogOut, RefreshCw, Users, Mail, Phone, Globe, Calendar, Download, Search, Trash2, X, ChevronDown } from "lucide-react";
 import sirahLogo from "@/assets/sirah-digital-logo.jpg";
 import { Session } from "@supabase/supabase-js";
 import {
@@ -17,6 +17,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Lead {
   id: string;
@@ -26,6 +32,7 @@ interface Lead {
   website_url: string | null;
   playbook_sent: boolean;
   created_at: string;
+  status: "new" | "messaged";
 }
 
 export default function Admin() {
@@ -130,13 +137,14 @@ export default function Admin() {
   };
 
   const exportToCSV = () => {
-    const headers = ["Name", "Email", "Phone", "Website", "Playbook Sent", "Date"];
+    const headers = ["Name", "Email", "Phone", "Website", "Playbook Sent", "Status", "Date"];
     const csvData = filteredLeads.map((lead) => [
       lead.name,
       lead.email,
       lead.phone || "",
       lead.website_url || "",
       lead.playbook_sent ? "Yes" : "No",
+      lead.status === "messaged" ? "Messaged" : "New",
       new Date(lead.created_at).toLocaleDateString(),
     ]);
 
@@ -151,6 +159,37 @@ export default function Admin() {
     a.download = `leads-${new Date().toISOString().split("T")[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleStatusChange = async (leadId: string, newStatus: "new" | "messaged") => {
+    if (!session) return;
+
+    try {
+      const { error } = await supabase.functions.invoke("update-lead-status", {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: { leadId, status: newStatus },
+      });
+
+      if (error) throw error;
+
+      setLeads(leads.map(lead => 
+        lead.id === leadId ? { ...lead, status: newStatus } : lead
+      ));
+
+      toast({
+        title: "Status updated",
+        description: `Lead marked as ${newStatus === "messaged" ? "Messaged" : "New"}.`,
+      });
+    } catch (error: any) {
+      console.error("Error updating status:", error);
+      toast({
+        title: "Error updating status",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   // Filter leads based on search query (email or name)
@@ -324,13 +363,38 @@ export default function Admin() {
                         )}
                       </td>
                       <td className="px-4 py-3">
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                          lead.playbook_sent
-                            ? "bg-green-500/20 text-green-600"
-                            : "bg-yellow-500/20 text-yellow-600"
-                        }`}>
-                          {lead.playbook_sent ? "Sent" : "Pending"}
-                        </span>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className={`h-7 px-2 gap-1 ${
+                                lead.status === "messaged"
+                                  ? "bg-green-500/20 text-green-600 hover:bg-green-500/30"
+                                  : "bg-blue-500/20 text-blue-600 hover:bg-blue-500/30"
+                              }`}
+                            >
+                              {lead.status === "messaged" ? "Messaged" : "New"}
+                              <ChevronDown className="w-3 h-3" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="start" className="bg-card border-border z-50">
+                            <DropdownMenuItem
+                              onClick={() => handleStatusChange(lead.id, "new")}
+                              className="cursor-pointer"
+                            >
+                              <span className="w-2 h-2 rounded-full bg-blue-500 mr-2" />
+                              New
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleStatusChange(lead.id, "messaged")}
+                              className="cursor-pointer"
+                            >
+                              <span className="w-2 h-2 rounded-full bg-green-500 mr-2" />
+                              Messaged
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </td>
                       <td className="px-4 py-3 text-muted-foreground text-sm hidden sm:table-cell">
                         {new Date(lead.created_at).toLocaleDateString()}

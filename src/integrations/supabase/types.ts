@@ -22,6 +22,7 @@ export type Database = {
           name: string
           phone: string | null
           playbook_sent: boolean | null
+          status: string
           website_url: string | null
         }
         Insert: {
@@ -31,6 +32,7 @@ export type Database = {
           name: string
           phone?: string | null
           playbook_sent?: boolean | null
+          status?: string
           website_url?: string | null
         }
         Update: {
@@ -40,6 +42,7 @@ export type Database = {
           name?: string
           phone?: string | null
           playbook_sent?: boolean | null
+          status?: string
           website_url?: string | null
         }
         Relationships: []
