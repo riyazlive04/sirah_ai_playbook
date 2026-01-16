@@ -2,13 +2,33 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Download } from "lucide-react";
+import { Download, ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import sirahLogo from "@/assets/sirah-digital-logo.jpg";
 import { useToast } from "@/hooks/use-toast";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+const countryCodes = [
+  { code: "+91", country: "IN", flag: "🇮🇳" },
+  { code: "+1", country: "US", flag: "🇺🇸" },
+  { code: "+44", country: "UK", flag: "🇬🇧" },
+  { code: "+971", country: "AE", flag: "🇦🇪" },
+  { code: "+65", country: "SG", flag: "🇸🇬" },
+  { code: "+61", country: "AU", flag: "🇦🇺" },
+  { code: "+49", country: "DE", flag: "🇩🇪" },
+  { code: "+33", country: "FR", flag: "🇫🇷" },
+  { code: "+81", country: "JP", flag: "🇯🇵" },
+  { code: "+86", country: "CN", flag: "🇨🇳" },
+];
 
 export default function GetPlaybook() {
   const [name, setName] = useState("");
+  const [countryCode, setCountryCode] = useState("+91");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
@@ -23,22 +43,17 @@ export default function GetPlaybook() {
     return email.length <= 254 && emailRegex.test(email.trim().toLowerCase());
   };
 
-  const isValidPhone = (phone: string) => {
-    // Remove all non-digit characters except +
-    const cleaned = phone.replace(/[^\d+]/g, '');
+  const isValidPhone = (phoneNumber: string, code: string) => {
+    // Remove all non-digit characters
+    const cleaned = phoneNumber.replace(/\D/g, '');
     
-    // Indian mobile: 10 digits starting with 6-9
-    const indianMobile = /^[6-9]\d{9}$/;
+    // For Indian numbers (+91), must be 10 digits starting with 6-9
+    if (code === "+91") {
+      return /^[6-9]\d{9}$/.test(cleaned);
+    }
     
-    // Indian with country code: +91 followed by 10 digits starting with 6-9
-    const indianWithCode = /^\+91[6-9]\d{9}$/;
-    
-    // International: + followed by 10-15 digits
-    const international = /^\+\d{10,15}$/;
-    
-    return indianMobile.test(cleaned) || 
-           indianWithCode.test(cleaned) || 
-           international.test(cleaned);
+    // For other countries, accept 6-15 digits
+    return cleaned.length >= 6 && cleaned.length <= 15;
   };
 
   const isValidUrl = (url: string) => {
@@ -48,6 +63,11 @@ export default function GetPlaybook() {
     } catch {
       return false;
     }
+  };
+
+  const getFullPhoneNumber = () => {
+    if (!phone.trim()) return "";
+    return `${countryCode}${phone.replace(/\D/g, '')}`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -74,10 +94,13 @@ export default function GetPlaybook() {
     }
 
     // Phone validation (if provided)
-    if (phone.trim() && !isValidPhone(phone)) {
+    if (phone.trim() && !isValidPhone(phone, countryCode)) {
+      const errorMsg = countryCode === "+91" 
+        ? "Enter a 10-digit mobile number starting with 6-9."
+        : "Enter a valid phone number (6-15 digits).";
       toast({
         title: "Invalid phone number",
-        description: "Enter a 10-digit mobile number (starting with 6-9) or include country code (e.g., +91).",
+        description: errorMsg,
         variant: "destructive",
       });
       return;
@@ -99,7 +122,7 @@ export default function GetPlaybook() {
       // Save lead to database
       const { error: insertError } = await supabase.from("leads").insert({
         name,
-        phone,
+        phone: getFullPhoneNumber(),
         email,
         website_url: websiteUrl,
       });
@@ -158,13 +181,41 @@ export default function GetPlaybook() {
             className="bg-muted/50 border-border/30 text-foreground placeholder:text-muted-foreground h-14 rounded-xl"
             required
           />
-          <Input
-            type="tel"
-            placeholder="Phone Number"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            className="bg-muted/50 border-border/30 text-foreground placeholder:text-muted-foreground h-14 rounded-xl"
-          />
+          <div className="flex gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  type="button"
+                  variant="outline" 
+                  className="bg-muted/50 border-border/30 h-14 rounded-xl px-3 flex items-center gap-1 min-w-[90px]"
+                >
+                  <span className="text-lg">{countryCodes.find(c => c.code === countryCode)?.flag}</span>
+                  <span className="text-sm">{countryCode}</span>
+                  <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-card border-border z-50 max-h-60 overflow-y-auto">
+                {countryCodes.map((country) => (
+                  <DropdownMenuItem
+                    key={country.code}
+                    onClick={() => setCountryCode(country.code)}
+                    className="cursor-pointer"
+                  >
+                    <span className="text-lg mr-2">{country.flag}</span>
+                    <span>{country.country}</span>
+                    <span className="ml-auto text-muted-foreground">{country.code}</span>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Input
+              type="tel"
+              placeholder="Phone Number"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="bg-muted/50 border-border/30 text-foreground placeholder:text-muted-foreground h-14 rounded-xl flex-1"
+            />
+          </div>
           <Input
             type="email"
             placeholder="Email Address"
