@@ -95,7 +95,7 @@ export default function ThankYou() {
           {/* CTA Text */}
           <p className="text-muted-foreground mb-4">
             If you ever want help implementing these systems,{" "}
-            <Link to="/" className="text-accent font-semibold hover:underline">
+            <Link to="https://sirahdigital.in/" className="text-accent font-semibold hover:underline">
               Sirah Digital is here
             </Link>
             .
