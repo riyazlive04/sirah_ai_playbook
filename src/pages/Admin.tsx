@@ -348,7 +348,7 @@ export default function Admin() {
                   <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Name</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Email</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground hidden md:table-cell">Phone</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground hidden lg:table-cell">Website</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground hidden md:table-cell">Website</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Status</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground hidden sm:table-cell">Date</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Actions</th>
@@ -388,7 +388,7 @@ export default function Admin() {
                           <span className="text-muted-foreground">-</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 hidden lg:table-cell">
+                      <td className="px-4 py-3 hidden md:table-cell">
                         {lead.website_url ? (
                           <a href={lead.website_url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground flex items-center gap-1">
                             <Globe className="w-3 h-3" />
