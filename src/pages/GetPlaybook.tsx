@@ -161,6 +161,26 @@ export default function GetPlaybook() {
 
       if (insertError) throw insertError;
 
+      // Trigger n8n webhook for lead notification
+      try {
+        await fetch("https://n8n.srv930949.hstgr.cloud/webhook/playbook-lead", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          mode: "no-cors",
+          body: JSON.stringify({
+            name,
+            email,
+            whatsapp: getFullPhoneNumber(),
+            whatsapp_optin: consentGiven,
+          }),
+        });
+      } catch (webhookError) {
+        console.error("Webhook error:", webhookError);
+        // Continue even if webhook fails
+      }
+
       // Send welcome email with playbook
       const { error: emailError } = await supabase.functions.invoke("send-playbook-email", {
         body: { name, email },
