@@ -165,18 +165,19 @@ export default function GetPlaybook() {
 
       // Trigger n8n webhook for lead notification
       try {
+        const formData = new URLSearchParams();
+        formData.append("name", name);
+        formData.append("email", email);
+        formData.append("whatsapp", getFullPhoneNumber());
+        formData.append("whatsapp_optin", "true");
+        
         await fetch("https://n8n.srv930949.hstgr.cloud/webhook/playbook-lead", {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "application/x-www-form-urlencoded",
           },
           mode: "no-cors",
-          body: JSON.stringify({
-            name,
-            email,
-            whatsapp: getFullPhoneNumber(),
-            whatsapp_optin: true,
-          }),
+          body: formData.toString(),
         });
       } catch (webhookError) {
         console.error("Webhook error:", webhookError);
