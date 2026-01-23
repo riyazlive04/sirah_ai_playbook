@@ -90,7 +90,9 @@ export default function GetPlaybook() {
 
   const getFullPhoneNumber = () => {
     if (!phone.trim()) return "";
-    return `${countryCode}${phone.replace(/\D/g, "")}`;
+    // Remove + symbol from country code for WhatsApp format
+    const cleanCountryCode = countryCode.replace(/\+/g, "");
+    return `${cleanCountryCode}${phone.replace(/\D/g, "")}`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
